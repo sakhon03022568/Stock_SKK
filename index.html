@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แดชบอร์ดคลังสำรองอุปกรณ์แก้กระแสไฟฟ้าขัดข้อง | กฟจ.สกลนคร</title>
+  <!-- Google Fonts: Prompt & Sarabun (สำหรับแบบฟอร์มพิมพ์) -->
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --pea-purple: #5c2d91;
+      --pea-purple-dark: #431c70;
+      --pea-purple-light: #f3ebfc;
+      --pea-gold: #f59e0b;
+      --bg-color: #f4f6f9;
+      --text-main: #1e293b;
+    }
+
+    body {
+      font-family: 'Prompt', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding-bottom: 50px;
+    }
+
+    /* Header Banner */
+    .exec-header {
+      background: linear-gradient(135deg, var(--pea-purple-dark) 0%, var(--pea-purple) 70%, #7e3af2 100%);
+      color: white;
+      padding: 24px 0 32px 0;
+      box-shadow: 0 4px 20px rgba(92, 45, 145, 0.25);
+      border-bottom: 4px solid var(--pea-gold);
+    }
+
+    .badge-exec {
+      background-color: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fde68a;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+    }
+
+    /* Office Selector Pills */
+    .office-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+      gap: 10px;
+      margin-top: -20px;
+    }
+
+    .btn-office {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      text-align: left;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .btn-office:hover {
+      transform: translateY(-2px);
+      border-color: var(--pea-purple);
+      box-shadow: 0 6px 15px rgba(92, 45, 145, 0.12);
+    }
+
+    .btn-office.active {
+      background: linear-gradient(135deg, var(--pea-purple) 0%, var(--pea-purple-dark) 100%);
+      color: white;
+      border-color: var(--pea-purple-dark);
+      box-shadow: 0 8px 20px rgba(92, 45, 145, 0.3);
+    }
+
+    .btn-office.btn-central {
+      border-color: #cbd5e1;
+      background: #fffbeb;
+    }
+
+    .btn-office.btn-central.active {
+      background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+      border-color: #92400e;
+      color: white;
+    }
+
+    .btn-office .size-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background-color: var(--pea-purple-light);
+      color: var(--pea-purple);
+      white-space: nowrap;
+    }
+
+    .btn-office.btn-central .size-tag {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .btn-office.active .size-tag {
+      background-color: var(--pea-gold);
+      color: #1e293b;
+    }
+
+    /* KPI Summary Cards */
+    .kpi-card {
+      background: white;
+      border-radius: 14px;
+      padding: 18px 22px;
+      border: none;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      border-left: 5px solid var(--pea-purple);
+      height: 100%;
+    }
+
+    .kpi-card.amber { border-left-color: #f59e0b; }
+    .kpi-card.warning { border-left-color: #ef4444; }
+    .kpi-card.success { border-left-color: #10b981; }
+
+    .kpi-title {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .kpi-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    /* Main Table Card */
+    .table-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+
+    .table-toolbar {
+      padding: 18px 24px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table.exec-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-bottom: 0;
+    }
+
+    table.exec-table thead th {
+      background-color: #1e293b;
+      color: white;
+      font-weight: 500;
+      font-size: 0.9rem;
+      padding: 14px 12px;
+      border-bottom: 3px solid var(--pea-gold);
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    table.exec-table tbody tr {
+      transition: background-color 0.15s;
+    }
+
+    table.exec-table tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    table.exec-table tbody tr.row-selected {
+      background-color: #f3ebfc !important;
+    }
+
+    table.exec-table td {
+      padding: 11px 12px;
+      vertical-align: middle;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.92rem;
+    }
+
+    .mat-code {
+      font-family: monospace;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--pea-purple-dark);
+      background: #f1f5f9;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    /* Diff Badges */
+    .diff-badge {
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-block;
+      min-width: 55px;
+      text-align: center;
+    }
+    .diff-shortage { background-color: #fee2e2; color: #b91c1c; }
+    .diff-ok { background-color: #dcfce7; color: #15803d; }
+
+    /* Input Request */
+    .req-input {
+      width: 95px;
+      text-align: right;
+      font-weight: 600;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 5px 10px;
+      color: var(--pea-purple-dark);
+    }
+    .req-input:focus {
+      border-color: var(--pea-purple);
+      box-shadow: 0 0 0 3px rgba(92, 45, 145, 0.15);
+      outline: none;
+    }
+
+    /* Custom Checkbox */
+    .form-check-input {
+      width: 1.25em;
+      height: 1.25em;
+      cursor: pointer;
+      border-color: #94a3b8;
+    }
+    .form-check-input:checked {
+      background-color: var(--pea-purple);
+      border-color: var(--pea-purple);
+    }
+
+    /* Page Size Selector Buttons */
+    .btn-page-size {
+      border-color: #cbd5e1;
+      color: #475569;
+      font-weight: 500;
+    }
+    .btn-page-size.active {
+      background-color: var(--pea-purple) !important;
+      border-color: var(--pea-purple) !important;
+      color: white !important;
+    }
+
+    /* Table Footer Pagination */
+    .table-footer {
+      padding: 14px 24px;
+      background-color: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pagination .page-link {
+      color: var(--pea-purple-dark);
+      border-color: #cbd5e1;
+      font-size: 0.88rem;
+      padding: 6px 12px;
+    }
+    .pagination .page-item.active .page-link {
+      background-color: var(--pea-purple);
+      border-color: var(--pea-purple);
+      color: white;
+    }
+
+    /* Loading Overlay */
+    #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.92);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* =======================================================
+       Print Form Layout (A4 Landscape, max 15 items per page)
+       ======================================================= */
+    #printContainer {
+      display: none;
+    }
+
+    .print-sheet {
+      font-family: 'Sarabun', 'Prompt', sans-serif;
+      color: #000000;
+      width: 100%;
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .print-sheet:last-child {
+      page-break-after: auto;
+      break-after: auto;
+    }
+
+    .print-header {
+      position: relative;
+      text-align: center;
+      min-height: 26mm;
+      padding-top: 1mm;
+      margin-bottom: 2.5mm;
+    }
+
+    .print-logo {
+      position: absolute;
+      left: 2mm;
+      top: 0;
+      width: 22mm;
+      height: 22mm;
+      object-fit: contain;
+    }
+
+    .print-page-num {
+      position: absolute;
+      right: 0;
+      top: 0;
+      font-size: 10pt;
+      color: #333333;
+    }
+
+    .print-title-1 {
+      font-size: 14pt;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .print-title-2 {
+      font-size: 12.5pt;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .print-title-3 {
+      font-size: 11.5pt;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .print-meta {
+      margin-top: 2.5mm;
+      font-size: 11.5pt;
+      font-weight: 700;
+      display: flex;
+      justify-content: center;
+      gap: 6mm;
+    }
+
+    table.print-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 10pt;
+    }
+
+    table.print-table th,
+    table.print-table td {
+      border: 1px solid #000000;
+      padding: 1.2mm 2mm;
+      vertical-align: middle;
+      line-height: 1.2;
+      color: #000000;
+    }
+
+    table.print-table thead th {
+      font-weight: 700;
+      text-align: center;
+      background-color: #ffffff;
+      height: 7.5mm;
+      font-size: 10pt;
+    }
+
+    table.print-table tbody tr {
+      height: 6.1mm;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    table.print-table .col-seq { width: 5%; text-align: center; }
+    table.print-table .col-mat { width: 13%; text-align: center; white-space: nowrap; }
+    table.print-table .col-desc { width: 34%; text-align: left; }
+    table.print-table .col-safety { width: 8.5%; text-align: center; }
+    table.print-table .col-remain { width: 10.5%; text-align: center; }
+    table.print-table .col-diff { width: 7%; text-align: center; }
+    table.print-table .col-req { width: 10.5%; text-align: center; font-weight: 700; }
+    table.print-table .col-sakon { width: 11.5%; text-align: center; }
+
+    .print-signatures {
+      width: 100%;
+      margin-top: 4mm;
+      border-collapse: collapse;
+      font-size: 10.5pt;
+      line-height: 1.35;
+    }
+
+    .print-signatures td {
+      vertical-align: top;
+      padding: 0.8mm 2mm;
+      color: #000000;
+    }
+
+    .print-sig-space {
+      height: 10mm;
+    }
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 8mm 10mm;
+      }
+
+      html, body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      #appShell,
+      .modal-backdrop,
+      .swal2-container {
+        display: none !important;
+      }
+
+      #printContainer {
+        display: block !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="appShell">
+    <!-- Loading Screen -->
+    <div id="loadingOverlay">
+      <div class="spinner-border text-primary" style="width: 3.5rem; height: 3.5rem; color: var(--pea-purple) !important;" role="status"></div>
+      <h5 class="mt-3 fw-semibold" style="color: var(--pea-purple-dark);">กำลังเชื่อมโยงข้อมูลคลังพัสดุ กฟจ.สกลนคร...</h5>
+      <p class="text-muted small">กำลังประมวลผลรายการ Safety Stock และยอดคงคลังเรียลไทม์</p>
+    </div>
+
+    <!-- Executive Header -->
+    <header class="exec-header">
+      <div class="container-fluid px-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div>
+            <span class="badge-exec mb-2 d-inline-block"><i class="fa-solid fa-bolt me-1"></i> EXECUTIVE INVENTORY DASHBOARD</span>
+            <h3 class="fw-bold mb-1">ระบบบริหารจัดการคลังสำรองอุปกรณ์ "งานแก้กระแสไฟฟ้าขัดข้อง"</h3>
+            <p class="mb-0 opacity-75 small" id="headerSubtitle">การไฟฟ้าส่วนภูมิภาคจังหวัดสกลนคร | เปรียบเทียบเกณฑ์ Safety Stock และคงคลังพัสดุสกลนคร (ชีต ST คอลัมน์ G - Q)</p>
+          </div>
+          <div class="text-end">
+            <button class="btn btn-light btn-sm fw-semibold rounded-pill px-3 shadow-sm" onclick="loadData()">
+              <i class="fa-solid fa-rotate-right me-1 text-primary"></i> อัปเดตข้อมูลล่าสุด
+            </button>
+            <div class="small mt-1 opacity-75" id="lastUpdatedText">อัปเดตเมื่อ: -</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="container-fluid px-4">
+      <!-- ปุ่มเลือกคลังทั้ง 10 แห่ง -->
+      <div class="office-grid mb-4" id="officeButtonsContainer">
+        <!-- Buttons rendered via JS -->
+      </div>
+
+      <!-- Executive KPI Cards 4 ใบ -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+          <div class="kpi-card">
+            <div class="kpi-title" id="kpiTitle1">จำนวนรายการ Safety</div>
+            <div class="kpi-value" id="kpiTotalItems">0 <span class="fs-6 fw-normal text-muted">รายการ</span></div>
+            <div class="small text-muted mt-1 text-truncate" id="kpiOfficeSub">-</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <div class="kpi-card amber">
+            <div class="kpi-title">เหลือน้อยกว่า 50% ของ Safety</div>
+            <div class="kpi-value text-warning" id="kpiLess50Items">0 <span class="fs-6 fw-normal text-muted">รายการ</span></div>
+            <div class="small text-muted mt-1">รายการที่คงเหลือน้อยกว่า 50% เมื่อเทียบกับ Safety</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <div class="kpi-card warning">
+            <div class="kpi-title">เหลือน้อยกว่า 20% ของ Safety</div>
+            <div class="kpi-value text-danger" id="kpiLess20Items">0 <span class="fs-6 fw-normal text-muted">รายการ</span></div>
+            <div class="small text-muted mt-1">รายการที่คงเหลือน้อยกว่า 20% เมื่อเทียบกับ Safety</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <div class="kpi-card success">
+            <div class="kpi-title">จำนวนรายการที่เบิกครั้งนี้</div>
+            <div class="kpi-value text-success" id="kpiSelectedCount">0 <span class="fs-6 fw-normal text-muted">รายการ</span></div>
+            <div class="small text-muted mt-1">ติ๊กถูกที่ตารางเพื่อสรุปรายการขอเบิก</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Data Table Card -->
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <div class="input-group" style="width: 240px;">
+              <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+              <input type="text" id="searchInput" class="form-control border-start-0" placeholder="ค้นหารหัสวัสดุ / คำอธิบาย..." onkeyup="filterTable()">
+            </div>
+            <button class="btn btn-outline-secondary btn-sm" id="btnAutoFill" onclick="autoFillShortage()" title="กรอกยอดเบิกอัตโนมัติตามจำนวนที่ขาด">
+              <i class="fa-solid fa-wand-magic-sparkles me-1"></i> เติมยอดเบิกตามผลต่างอัตโนมัติ
+            </button>
+            <button class="btn btn-outline-danger btn-sm" id="btnClearSel" onclick="clearAllSelections()">
+              <i class="fa-solid fa-eraser me-1"></i> ล้างการเลือก
+            </button>
+          </div>
+
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <div class="d-flex align-items-center gap-1 me-1">
+              <span class="small text-muted fw-medium">แสดงผล:</span>
+              <div class="btn-group btn-group-sm" role="group" aria-label="จำนวนรายการที่แสดง">
+                <button type="button" class="btn btn-outline-secondary btn-page-size active" id="btn-size-0" onclick="changePageSize(0)">ทั้งหมด</button>
+                <button type="button" class="btn btn-outline-secondary btn-page-size" id="btn-size-20" onclick="changePageSize(20)">20</button>
+                <button type="button" class="btn btn-outline-secondary btn-page-size" id="btn-size-50" onclick="changePageSize(50)">50</button>
+                <button type="button" class="btn btn-outline-secondary btn-page-size" id="btn-size-100" onclick="changePageSize(100)">100</button>
+              </div>
+            </div>
+
+            <!-- ปุ่มใหม่: รายการที่ต้องการเบิก (แสดงผลต่าง > 0) -->
+            <button type="button" class="btn btn-outline-primary fw-semibold px-3 py-2 rounded-3" id="btnOnlyDiffPositive" onclick="toggleOnlyDiffPositive()">
+              <i class="fa-solid fa-filter me-1"></i> รายการที่ต้องการเบิก
+            </button>
+
+            <button type="button" class="btn btn-outline-danger fw-semibold px-3 py-2 rounded-3" id="btnHideRedSakon" onclick="toggleHideRedSakon()">
+              <i class="fa-solid fa-filter-circle-xmark me-1"></i> นำรายการที่คลังไม่มีวัสดุออก
+            </button>
+
+            <button type="button" class="btn btn-primary fw-semibold px-4 py-2 rounded-3 shadow-sm" id="btnShowSelected" style="background-color: var(--pea-purple); border-color: var(--pea-purple);" onclick="showSelectedModal()">
+              <i class="fa-solid fa-clipboard-check me-2"></i> แสดงรายการที่เลือก
+              <span class="badge bg-warning text-dark ms-1 rounded-pill" id="btnSelectedBadge">0</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="exec-table" id="inventoryTable">
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 45px;">
+                  <input type="checkbox" class="form-check-input" id="selectAllCheckbox" onclick="toggleSelectAll(this)" title="เลือกทั้งหมดในหน้านี้">
+                </th>
+                <th class="text-center" style="width: 65px;">ลำดับ</th>
+                <th style="width: 150px;">วัสดุ</th>
+                <th>คำอธิบายวัสดุ</th>
+                <th class="text-end" style="width: 110px;">Safety</th>
+                <th class="text-end" style="width: 110px;">คงเหลือ</th>
+                <th class="text-center" style="width: 110px;">ผลต่าง</th>
+                <th class="text-center" style="width: 130px;">ต้องการเบิก</th>
+                <th class="text-end" style="width: 165px;">
+                  คลังพัสดุสกลนคร
+                  <div class="small fw-normal text-warning" id="sakonHeaderCodeText" style="font-size: 0.72rem;"></div>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Rows rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        <div class="table-footer">
+          <div class="small text-muted" id="paginationInfo">แสดง 0 รายการ</div>
+          <nav aria-label="Table pagination">
+            <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal แสดงรายการที่เลือกเบิก -->
+    <div class="modal fade" id="selectedModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+          <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--pea-purple-dark), var(--pea-purple));">
+            <div>
+              <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-invoice me-2"></i> สรุปรายการขอเบิกพัสดุสำรองแก้กระแสไฟฟ้าขัดข้อง</h5>
+              <small class="opacity-75" id="modalOfficeSubtitle">หน่วยงาน: -</small>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div id="modalEmptyState" class="text-center py-5 d-none">
+              <i class="fa-regular fa-folder-open fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">ยังไม่มีรายการวัสดุที่ถูกเลือก</h5>
+              <p class="small text-muted">กรุณาติ๊กถูกหน้าช่องรายการในตารางหลักเพื่อเลือกรายการที่ต้องการเบิก</p>
+            </div>
+            <div class="table-responsive" id="modalTableWrapper">
+              <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                  <tr>
+                    <th class="text-center" style="width: 60px;">ลำดับ</th>
+                    <th style="width: 145px;">รหัสวัสดุ</th>
+                    <th>คำอธิบายวัสดุ</th>
+                    <th class="text-end">เกณฑ์ Safety</th>
+                    <th class="text-end">คงเหลือปัจจุบัน</th>
+                    <th class="text-end">ผลต่าง</th>
+                    <th class="text-end bg-warning text-dark">จำนวนต้องการเบิก</th>
+                    <th class="text-end" id="modalSakonColHeader">คงเหลือคลังสกลนคร</th>
+                  </tr>
+                </thead>
+                <tbody id="modalTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
+            <button type="button" class="btn btn-success fw-semibold" onclick="exportSelectedCSV()">
+              <i class="fa-solid fa-file-excel me-1"></i> ดาวน์โหลดไฟล์ CSV
+            </button>
+            <button type="button" class="btn btn-primary fw-semibold" style="background-color: var(--pea-purple);" onclick="printSelectedForm()">
+              <i class="fa-solid fa-print me-1"></i> พิมพ์ใบสรุปรายการ
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- พื้นที่สำหรับพิมพ์สำรองกรณีเบราว์เซอร์บล็อก Popup -->
+  <div id="printContainer"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxV-cP-PStLl15JgtMhiFB36XD5_4Gupwb_-kaNSYuAoWmGlW4FJ_XHyXru6Zr0mOXr/exec";
+
+    const PEA_LOGO_SVG = "https://upload.wikimedia.org/wikipedia/commons/9/90/Logo_of_the_Provincial_Electricity_Authority_of_Thailand.svg";
+    const PEA_LOGO_PNG = "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Logo_of_the_Provincial_Electricity_Authority_of_Thailand.svg/250px-Logo_of_the_Provincial_Electricity_Authority_of_Thailand.svg.png";
+
+    let sakonWarehouseCode = "G";
+    const CENTRAL_OFFICE_TEMPLATE = {
+      id: 0,
+      key: "G",
+      name: "คลังพัสดุสกลนคร",
+      size: "Safety Q",
+      code: "คอลัมน์ G",
+      isCentral: true
+    };
+
+    let BRANCH_OFFICES = [
+      { id: 1, key: "H", name: "ผปบ.กฟจ.สกลนคร(L)", size: "L", code: "2001" },
+      { id: 2, key: "I", name: "ผปร.กฟส.อากาศอำนวย(S)", size: "S", code: "2201" },
+      { id: 3, key: "J", name: "ผปร.กฟส.พรรณานิคม(S)", size: "S", code: "2301" },
+      { id: 4, key: "K", name: "กฟส.โพนนาแก้ว(XS)", size: "XS", code: "9102" },
+      { id: 5, key: "L", name: "กฟส.โคกศรีสุพรรณ(XS)", size: "XS", code: "9103" },
+      { id: 6, key: "M", name: "กฟส.เต่างอย(XS)", size: "XS", code: "9104" },
+      { id: 7, key: "N", name: "กฟส.กุสุมาลย์(XS)", size: "XS", code: "9105" },
+      { id: 8, key: "O", name: "กฟส.กุดบาก(XS)", size: "XS", code: "9106" },
+      { id: 9, key: "P", name: "กฟส.ภูพาน(XS)", size: "XS", code: "9107" }
+    ];
+
+    let OFFICES = [CENTRAL_OFFICE_TEMPLATE, ...BRANCH_OFFICES];
+
+    let rawMaterials = [];
+    let stockMap = {};
+    let currentOffice = BRANCH_OFFICES[0];
+    let currentTableRows = [];
+    let filteredRows = [];
+
+    let pageSize = 0; // ค่าเริ่มต้นแสดงทั้งหมด
+    let currentPage = 1;
+    let hideRedSakon = false;
+    let onlyDiffPositive = false;
+    let userState = {};
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function isSakonDefaultLabel() {
+      return !sakonWarehouseCode || sakonWarehouseCode === "G" || sakonWarehouseCode === "คลังพัสดุสกลนคร";
+    }
+
+    function getThaiDateString() {
+      const months = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+      ];
+      const now = new Date();
+      const day = now.getDate();
+      const month = months[now.getMonth()];
+      const yearBE = now.getFullYear() + 543;
+      return `${day} ${month} ${yearBE}`;
+    }
+
+    function isRowRedInSakon(row, reqQty) {
+      return row.sakonStock < reqQty || row.sakonStock === 0;
+    }
+
+    window.onload = function() {
+      const preloadImg = new Image();
+      preloadImg.src = PEA_LOGO_SVG;
+
+      renderOfficeButtons();
+      loadData();
+    };
+
+    function renderOfficeButtons() {
+      const container = document.getElementById("officeButtonsContainer");
+      container.innerHTML = OFFICES.map(off => {
+        const subText = off.isCentral
+          ? (isSakonDefaultLabel() ? "คงเหลือ: G | Safety: Q" : `รหัสคลัง: ${escapeHtml(off.code)}`)
+          : `รหัสคลัง: ${escapeHtml(off.code)}`;
+        return `
+          <button type="button" class="btn-office ${off.isCentral ? 'btn-central' : ''} ${off.key === currentOffice.key ? 'active' : ''}" 
+                  id="btn-off-${off.key}" onclick="selectOffice('${off.key}')">
+            <div class="pe-2" style="min-width: 0;">
+              <div class="fw-semibold text-truncate" style="font-size: 0.92rem;">
+                ${off.isCentral ? '<i class="fa-solid fa-warehouse me-1"></i>' : ''}${escapeHtml(off.name)}
+              </div>
+              <div class="small opacity-75 text-truncate" style="font-size: 0.75rem;">${subText}</div>
+            </div>
+            <span class="size-tag">${escapeHtml(off.size)}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    async function loadData() {
+      document.getElementById("loadingOverlay").style.display = "flex";
+
+      try {
+        const separator = GAS_API_URL.includes("?") ? "&" : "?";
+        const requestUrl = `${GAS_API_URL}${separator}_t=${Date.now()}`;
+
+        const response = await fetch(requestUrl, {
+          method: "GET",
+          redirect: "follow"
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP Error ${response.status}`);
+        }
+
+        const res = await response.json();
+        document.getElementById("loadingOverlay").style.display = "none";
+
+        if (!res.success) {
+          Swal.fire('เกิดข้อผิดพลาด', res.error || 'ไม่สามารถอ่านข้อมูลได้', 'error');
+          return;
+        }
+
+        if (res.offices && res.offices.length > 0) {
+          BRANCH_OFFICES = res.offices;
+        }
+        sakonWarehouseCode = res.sakonCode || "G";
+
+        const centralOffice = {
+          ...CENTRAL_OFFICE_TEMPLATE,
+          code: isSakonDefaultLabel() ? "คอลัมน์ G" : sakonWarehouseCode
+        };
+        OFFICES = [centralOffice, ...BRANCH_OFFICES];
+
+        rawMaterials = res.materials || [];
+        stockMap = res.stockMap || {};
+
+        document.getElementById("lastUpdatedText").innerText = "อัปเดตเมื่อ: " + res.lastUpdated;
+        document.getElementById("sakonHeaderCodeText").innerText =
+          isSakonDefaultLabel() ? "ชีต ST คอลัมน์ G" : `รหัสคลัง: ${sakonWarehouseCode}`;
+
+        const matchedOffice = OFFICES.find(o => o.key === currentOffice.key) || BRANCH_OFFICES[0];
+        currentOffice = matchedOffice;
+
+        renderOfficeButtons();
+        selectOffice(currentOffice.key);
+
+      } catch (err) {
+        document.getElementById("loadingOverlay").style.display = "none";
+        Swal.fire('ไม่สามารถเชื่อมต่อได้', err.message, 'error');
+      }
+    }
+
+    function selectOffice(officeKey) {
+      currentOffice = OFFICES.find(o => o.key === officeKey) || BRANCH_OFFICES[0];
+      if (!userState[currentOffice.key]) {
+        userState[currentOffice.key] = {};
+      }
+
+      hideRedSakon = false;
+      onlyDiffPositive = false;
+      updateHideRedButtonUI();
+      updateDiffFilterButtonUI();
+
+      document.querySelectorAll('.btn-office').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`btn-off-${currentOffice.key}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const officeStock = stockMap[currentOffice.key] || {};
+      currentTableRows = [];
+
+      let lessThan50Count = 0;
+      let lessThan20Count = 0;
+
+      rawMaterials.forEach(item => {
+        let safetyVal = 0;
+        if (currentOffice.isCentral) safetyVal = item.safetySakon || 0;
+        else if (currentOffice.size === "L") safetyVal = item.safetyL;
+        else if (currentOffice.size === "S") safetyVal = item.safetyS;
+        else if (currentOffice.size === "XS") safetyVal = item.safetyXS;
+
+        if (safetyVal > 0) {
+          const remainVal = currentOffice.isCentral
+            ? (parseFloat(item.sakonStock) || 0)
+            : (officeStock[item.matCode] || 0);
+          const diffVal = safetyVal - remainVal;
+          const sakonVal = parseFloat(item.sakonStock) || 0;
+
+          if (remainVal < safetyVal * 0.5) lessThan50Count++;
+          if (remainVal < safetyVal * 0.2) lessThan20Count++;
+
+          if (!userState[currentOffice.key][item.matCode]) {
+            const defaultReq = diffVal > 0 ? Math.min(diffVal, safetyVal) : 0;
+            userState[currentOffice.key][item.matCode] = {
+              checked: false,
+              reqQty: defaultReq
+            };
+          }
+
+          currentTableRows.push({
+            matCode: item.matCode,
+            desc: item.desc,
+            safety: safetyVal,
+            remain: remainVal,
+            diff: diffVal,
+            sakonStock: sakonVal
+          });
+        }
+      });
+
+      document.getElementById("kpiTitle1").innerText = "จำนวนรายการ Safety";
+      document.getElementById("kpiTotalItems").innerHTML = `${currentTableRows.length} <span class="fs-6 fw-normal text-muted">รายการ</span>`;
+      document.getElementById("kpiOfficeSub").innerText = currentOffice.isCentral
+        ? "คลังพัสดุสกลนคร (คงเหลือ: คอลัมน์ G | Safety: คอลัมน์ Q)"
+        : `${currentOffice.name} (รหัสคลัง: ${currentOffice.code})`;
+      document.getElementById("kpiLess50Items").innerHTML = `${lessThan50Count} <span class="fs-6 fw-normal text-muted">รายการ</span>`;
+      document.getElementById("kpiLess20Items").innerHTML = `${lessThan20Count} <span class="fs-6 fw-normal text-muted">รายการ</span>`;
+
+      document.getElementById("searchInput").value = "";
+      currentPage = 1;
+      applyFilters();
+      updateSelectedCounter();
+    }
+
+    // ปุ่ม "รายการที่ต้องการเบิก": แสดงเฉพาะผลต่าง > 0
+    function toggleOnlyDiffPositive() {
+      onlyDiffPositive = !onlyDiffPositive;
+      const officeState = userState[currentOffice.key] || {};
+
+      if (onlyDiffPositive) {
+        currentTableRows.forEach(row => {
+          if (row.diff <= 0 && officeState[row.matCode] && officeState[row.matCode].checked) {
+            officeState[row.matCode].checked = false;
+          }
+        });
+      }
+
+      updateDiffFilterButtonUI();
+      currentPage = 1;
+      applyFilters();
+      updateSelectedCounter();
+
+      if (onlyDiffPositive) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'info',
+          title: `แสดงเฉพาะรายการที่ผลต่าง > 0 จำนวน ${filteredRows.length} รายการ`,
+          showConfirmButton: false,
+          timer: 2000
+        });
+      }
+    }
+
+    function updateDiffFilterButtonUI() {
+      const btn = document.getElementById("btnOnlyDiffPositive");
+      if (onlyDiffPositive) {
+        btn.classList.remove("btn-outline-primary");
+        btn.classList.add("btn-primary", "text-white");
+        btn.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> รายการที่ต้องการเบิก (> 0)`;
+      } else {
+        btn.classList.remove("btn-primary", "text-white");
+        btn.classList.add("btn-outline-primary");
+        btn.innerHTML = `<i class="fa-solid fa-filter me-1"></i> รายการที่ต้องการเบิก`;
+      }
+    }
+
+    function toggleHideRedSakon() {
+      hideRedSakon = !hideRedSakon;
+      const officeState = userState[currentOffice.key] || {};
+
+      if (hideRedSakon) {
+        let removedCount = 0;
+        currentTableRows.forEach(row => {
+          const reqQty = officeState[row.matCode] ? (officeState[row.matCode].reqQty || 0) : 0;
+          if (isRowRedInSakon(row, reqQty)) {
+            if (officeState[row.matCode] && officeState[row.matCode].checked) {
+              officeState[row.matCode].checked = false;
+            }
+            removedCount++;
+          }
+        });
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'info',
+          title: `นำรายการที่คลังสกลนครไม่มี/ไม่พอเบิกออกแล้ว ${removedCount} รายการ`,
+          showConfirmButton: false,
+          timer: 2200
+        });
+      }
+
+      updateHideRedButtonUI();
+      currentPage = 1;
+      applyFilters();
+      updateSelectedCounter();
+    }
+
+    function updateHideRedButtonUI() {
+      const btn = document.getElementById("btnHideRedSakon");
+      if (hideRedSakon) {
+        btn.classList.remove("btn-outline-danger");
+        btn.classList.add("btn-danger", "text-white");
+        btn.innerHTML = `<i class="fa-solid fa-eye me-1"></i> แสดงรายการที่คลังไม่มีวัสดุ`;
+      } else {
+        btn.classList.remove("btn-danger", "text-white");
+        btn.classList.add("btn-outline-danger");
+        btn.innerHTML = `<i class="fa-solid fa-filter-circle-xmark me-1"></i> นำรายการที่คลังไม่มีวัสดุออก`;
+      }
+    }
+
+    function applyFilters() {
+      const keyword = document.getElementById("searchInput").value.toLowerCase().trim();
+      const officeState = userState[currentOffice.key] || {};
+
+      filteredRows = currentTableRows.filter(row => {
+        if (keyword) {
+          const matchKeyword =
+            row.matCode.toLowerCase().includes(keyword) ||
+            row.desc.toLowerCase().includes(keyword);
+          if (!matchKeyword) return false;
+        }
+
+        if (onlyDiffPositive && row.diff <= 0) {
+          return false;
+        }
+
+        if (hideRedSakon) {
+          const reqQty = officeState[row.matCode] ? (officeState[row.matCode].reqQty || 0) : 0;
+          if (isRowRedInSakon(row, reqQty)) return false;
+        }
+
+        return true;
+      });
+
+      renderCurrentPage();
+    }
+
+    function changePageSize(newSize) {
+      pageSize = newSize;
+      currentPage = 1;
+      document.querySelectorAll('.btn-page-size').forEach(btn => btn.classList.remove('active'));
+      const activeSizeBtn = document.getElementById(`btn-size-${newSize}`);
+      if (activeSizeBtn) activeSizeBtn.classList.add('active');
+      renderCurrentPage();
+    }
+
+    function goToPage(page) {
+      const effectiveSize = pageSize === 0 ? Math.max(1, filteredRows.length) : pageSize;
+      const totalPages = Math.max(1, Math.ceil(filteredRows.length / effectiveSize));
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderCurrentPage();
+      document.getElementById("inventoryTable").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function renderCurrentPage() {
+      const totalItems = filteredRows.length;
+      const effectiveSize = pageSize === 0 ? Math.max(1, totalItems) : pageSize;
+      const totalPages = Math.max(1, Math.ceil(totalItems / effectiveSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const startIndex = (currentPage - 1) * effectiveSize;
+      const endIndex = Math.min(startIndex + effectiveSize, totalItems);
+      const pageRows = filteredRows.slice(startIndex, endIndex);
+
+      renderTable(pageRows, startIndex);
+      renderPagination(totalItems, totalPages, startIndex, endIndex);
+      syncSelectAllCheckbox();
+    }
+
+    function renderTable(rows, startIndex) {
+      const tbody = document.getElementById("tableBody");
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-5 text-muted">ไม่พบรายการพัสดุที่ตรงตามเงื่อนไข</td></tr>`;
+        return;
+      }
+
+      const officeState = userState[currentOffice.key] || {};
+
+      tbody.innerHTML = rows.map((row, index) => {
+        const state = officeState[row.matCode] || { checked: false, reqQty: 0 };
+        const diffBadgeClass = row.diff > 0 ? 'diff-shortage' : 'diff-ok';
+        const diffText = row.diff > 0 ? `+${row.diff.toLocaleString()}` : row.diff.toLocaleString();
+        const safeMat = escapeHtml(row.matCode);
+        const isSakonShort = isRowRedInSakon(row, state.reqQty);
+
+        return `
+          <tr data-row-mat="${safeMat}" class="${state.checked ? 'row-selected' : ''}">
+            <td class="text-center">
+              <input type="checkbox" class="form-check-input row-checkbox" 
+                     data-mat="${safeMat}" ${state.checked ? 'checked' : ''} 
+                     onchange="onCheckRow(this.getAttribute('data-mat'), this.checked)">
+            </td>
+            <td class="text-center fw-semibold text-muted">${startIndex + index + 1}</td>
+            <td><span class="mat-code">${safeMat}</span></td>
+            <td>${escapeHtml(row.desc)}</td>
+            <td class="text-end fw-bold text-dark">${row.safety.toLocaleString()}</td>
+            <td class="text-end fw-semibold text-primary">${row.remain.toLocaleString()}</td>
+            <td class="text-center">
+              <span class="diff-badge ${diffBadgeClass}" title="${row.diff > 0 ? 'ขาดจากเกณฑ์ Safety' : 'มีเพียงพอตามเกณฑ์'}">
+                ${diffText}
+              </span>
+            </td>
+            <td class="text-center">
+              <input type="number" class="req-input" min="0" max="${row.safety}" 
+                     data-mat="${safeMat}"
+                     value="${state.reqQty}" 
+                     onchange="onReqQtyChange(this.getAttribute('data-mat'), ${row.safety}, this)"
+                     oninput="onReqQtyInput(this.getAttribute('data-mat'), ${row.safety}, this)">
+            </td>
+            <td class="text-end fw-bold sakon-stock-cell ${isSakonShort ? 'text-danger' : 'text-success'}">
+              ${row.sakonStock.toLocaleString()}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateSakonCellColor(matCode, reqQty) {
+      const rowObj = currentTableRows.find(r => r.matCode === matCode);
+      if (!rowObj) return;
+      const tr = Array.from(document.querySelectorAll('#tableBody tr')).find(el => el.getAttribute('data-row-mat') === matCode);
+      if (!tr) return;
+      const sakonCell = tr.querySelector('.sakon-stock-cell');
+      if (!sakonCell) return;
+
+      const isSakonShort = isRowRedInSakon(rowObj, reqQty);
+      sakonCell.classList.toggle('text-danger', isSakonShort);
+      sakonCell.classList.toggle('text-success', !isSakonShort);
+    }
+
+    function renderPagination(totalItems, totalPages, startIndex, endIndex) {
+      const infoEl = document.getElementById("paginationInfo");
+      const controlsEl = document.getElementById("paginationControls");
+
+      if (totalItems === 0) {
+        infoEl.innerText = "แสดง 0 รายการ";
+        controlsEl.innerHTML = "";
+        return;
+      }
+
+      if (pageSize === 0 || totalPages <= 1) {
+        infoEl.innerText = `แสดงลำดับที่ ${startIndex + 1} - ${endIndex} จากทั้งหมด ${totalItems} รายการ`;
+        controlsEl.innerHTML = "";
+        return;
+      }
+
+      infoEl.innerText = `แสดงลำดับที่ ${startIndex + 1} - ${endIndex} จากทั้งหมด ${totalItems} รายการ (หน้า ${currentPage} / ${totalPages})`;
+
+      let html = `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+          <button class="page-link" type="button" onclick="goToPage(${currentPage - 1})">&laquo; ก่อนหน้า</button>
+        </li>
+      `;
+
+      for (let p = 1; p <= totalPages; p++) {
+        if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2) {
+          html += `
+            <li class="page-item ${p === currentPage ? 'active' : ''}">
+              <button class="page-link" type="button" onclick="goToPage(${p})">${p}</button>
+            </li>
+          `;
+        } else if (Math.abs(p - currentPage) === 3) {
+          html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+      }
+
+      html += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+          <button class="page-link" type="button" onclick="goToPage(${currentPage + 1})">ถัดไป &raquo;</button>
+        </li>
+      `;
+
+      controlsEl.innerHTML = html;
+    }
+
+    function validateMaxInput(inputEl, maxSafety) {
+      let val = parseFloat(inputEl.value);
+      if (val > maxSafety) {
+        inputEl.value = maxSafety;
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'warning',
+          title: `กรอกเบิกได้สูงสุดไม่เกินเกณฑ์ Safety (${maxSafety})`,
+          showConfirmButton: false,
+          timer: 2000
+        });
+      } else if (val < 0) {
+        inputEl.value = 0;
+      }
+    }
+
+    function onReqQtyInput(matCode, maxSafety, inputEl) {
+      validateMaxInput(inputEl, maxSafety);
+      const val = parseFloat(inputEl.value) || 0;
+      updateSakonCellColor(matCode, val);
+    }
+
+    function onReqQtyChange(matCode, maxSafety, inputEl) {
+      let val = parseFloat(inputEl.value) || 0;
+      if (val > maxSafety) val = maxSafety;
+      if (val < 0) val = 0;
+      inputEl.value = val;
+
+      userState[currentOffice.key][matCode].reqQty = val;
+      updateSakonCellColor(matCode, val);
+
+      if (val > 0 && !userState[currentOffice.key][matCode].checked) {
+        userState[currentOffice.key][matCode].checked = true;
+        const cb = Array.from(document.querySelectorAll('.row-checkbox')).find(el => el.getAttribute('data-mat') === matCode);
+        if (cb) cb.checked = true;
+        const tr = Array.from(document.querySelectorAll('#tableBody tr')).find(el => el.getAttribute('data-row-mat') === matCode);
+        if (tr) tr.classList.add('row-selected');
+        updateSelectedCounter();
+        syncSelectAllCheckbox();
+      }
+    }
+
+    function onCheckRow(matCode, isChecked) {
+      userState[currentOffice.key][matCode].checked = isChecked;
+      const tr = Array.from(document.querySelectorAll('#tableBody tr')).find(el => el.getAttribute('data-row-mat') === matCode);
+      if (tr) {
+        if (isChecked) tr.classList.add('row-selected');
+        else tr.classList.remove('row-selected');
+      }
+      updateSelectedCounter();
+      syncSelectAllCheckbox();
+    }
+
+    function toggleSelectAll(masterCb) {
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+      checkboxes.forEach(cb => {
+        cb.checked = masterCb.checked;
+        const matCode = cb.getAttribute('data-mat');
+        userState[currentOffice.key][matCode].checked = masterCb.checked;
+        const tr = cb.closest('tr');
+        if (tr) {
+          if (masterCb.checked) tr.classList.add('row-selected');
+          else tr.classList.remove('row-selected');
+        }
+      });
+      updateSelectedCounter();
+    }
+
+    function syncSelectAllCheckbox() {
+      const masterCb = document.getElementById("selectAllCheckbox");
+      const checkboxes = Array.from(document.querySelectorAll('.row-checkbox'));
+      if (checkboxes.length === 0) {
+        masterCb.checked = false;
+        return;
+      }
+      masterCb.checked = checkboxes.every(cb => cb.checked);
+    }
+
+    function updateSelectedCounter() {
+      const officeState = userState[currentOffice.key] || {};
+      let count = 0;
+      currentTableRows.forEach(r => {
+        if (officeState[r.matCode] && officeState[r.matCode].checked) {
+          count++;
+        }
+      });
+      document.getElementById("btnSelectedBadge").innerText = count;
+      document.getElementById("kpiSelectedCount").innerHTML = `${count} <span class="fs-6 fw-normal text-muted">รายการ</span>`;
+    }
+
+    function filterTable() {
+      currentPage = 1;
+      applyFilters();
+    }
+
+    function autoFillShortage() {
+      let filledCount = 0;
+      currentTableRows.forEach(row => {
+        if (currentOffice.isCentral) {
+          if (row.diff > 0) {
+            const suggestQty = Math.min(row.diff, row.safety);
+            userState[currentOffice.key][row.matCode] = {
+              checked: true,
+              reqQty: suggestQty
+            };
+            filledCount++;
+          }
+        } else {
+          if (row.diff > 0 && row.sakonStock > 0) {
+            const suggestQty = Math.min(row.diff, row.safety, row.sakonStock);
+            userState[currentOffice.key][row.matCode] = {
+              checked: true,
+              reqQty: suggestQty
+            };
+            filledCount++;
+          }
+        }
+      });
+      applyFilters();
+      updateSelectedCounter();
+      Swal.fire({
+        icon: 'success',
+        title: 'คำนวณยอดเบิกอัตโนมัติเรียบร้อย',
+        text: `เลือกรายการที่ขาดเกณฑ์ Safety จำนวน ${filledCount} รายการ`,
+        timer: 2200,
+        showConfirmButton: false
+      });
+    }
+
+    function clearAllSelections() {
+      Object.keys(userState[currentOffice.key] || {}).forEach(matCode => {
+        userState[currentOffice.key][matCode].checked = false;
+      });
+      document.getElementById("selectAllCheckbox").checked = false;
+      applyFilters();
+      updateSelectedCounter();
+    }
+
+    function showSelectedModal() {
+      const officeState = userState[currentOffice.key] || {};
+      const selectedItems = currentTableRows.filter(r => officeState[r.matCode] && officeState[r.matCode].checked);
+
+      const sakonSuffix = isSakonDefaultLabel() ? "" : ` (รหัสคลัง ${sakonWarehouseCode})`;
+      document.getElementById("modalOfficeSubtitle").innerText = currentOffice.isCentral
+        ? `หน่วยงานผู้เบิก: คลังพัสดุสกลนคร (ชีต ST คอลัมน์ G | Safety คอลัมน์ Q)`
+        : `หน่วยงานผู้เบิก: ${currentOffice.name} (รหัสคลัง ${currentOffice.code}) | เบิกจาก: คลังพัสดุสกลนคร${sakonSuffix}`;
+      document.getElementById("modalSakonColHeader").innerText = `คงเหลือคลังสกลนคร${sakonSuffix}`;
+
+      const emptyState = document.getElementById("modalEmptyState");
+      const tableWrapper = document.getElementById("modalTableWrapper");
+      const modalBody = document.getElementById("modalTableBody");
+
+      if (selectedItems.length === 0) {
+        emptyState.classList.remove("d-none");
+        tableWrapper.classList.add("d-none");
+      } else {
+        emptyState.classList.add("d-none");
+        tableWrapper.classList.remove("d-none");
+
+        modalBody.innerHTML = selectedItems.map((item, idx) => {
+          const reqQty = officeState[item.matCode].reqQty || 0;
+          const isSakonShort = item.sakonStock < reqQty || item.sakonStock === 0;
+          return `
+            <tr>
+              <td class="text-center">${idx + 1}</td>
+              <td class="fw-bold"><span class="mat-code">${escapeHtml(item.matCode)}</span></td>
+              <td>${escapeHtml(item.desc)}</td>
+              <td class="text-end">${item.safety.toLocaleString()}</td>
+              <td class="text-end">${item.remain.toLocaleString()}</td>
+              <td class="text-end text-danger fw-semibold">${item.diff.toLocaleString()}</td>
+              <td class="text-end fw-bold fs-6 bg-warning-subtle text-dark">${reqQty.toLocaleString()}</td>
+              <td class="text-end fw-bold ${isSakonShort ? 'text-danger' : 'text-success'}">${item.sakonStock.toLocaleString()}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const modal = new bootstrap.Modal(document.getElementById('selectedModal'));
+      modal.show();
+    }
+
+    function buildPrintSheetsHtml(selectedItems, officeState) {
+      const ITEMS_PER_PAGE = 15;
+      const totalPages = Math.ceil(selectedItems.length / ITEMS_PER_PAGE);
+      const printDateStr = getThaiDateString();
+      const officeLabel = escapeHtml(currentOffice.name);
+
+      let sheetsHtml = "";
+
+      for (let page = 0; page < totalPages; page++) {
+        const startIdx = page * ITEMS_PER_PAGE;
+        const chunk = selectedItems.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+
+        let rowsHtml = "";
+        for (let r = 0; r < ITEMS_PER_PAGE; r++) {
+          const seqNo = startIdx + r + 1;
+          const item = chunk[r];
+
+          if (item) {
+            const reqQty = officeState[item.matCode].reqQty || 0;
+            rowsHtml += `
+              <tr>
+                <td class="col-seq">${seqNo}</td>
+                <td class="col-mat">${escapeHtml(item.matCode)}</td>
+                <td class="col-desc">${escapeHtml(item.desc)}</td>
+                <td class="col-safety">${item.safety.toLocaleString()}</td>
+                <td class="col-remain">${item.remain.toLocaleString()}</td>
+                <td class="col-diff">${item.diff.toLocaleString()}</td>
+                <td class="col-req">${reqQty.toLocaleString()}</td>
+                <td class="col-sakon">${item.sakonStock.toLocaleString()}</td>
+              </tr>
+            `;
+          } else {
+            rowsHtml += `
+              <tr>
+                <td class="col-seq">${seqNo}</td>
+                <td class="col-mat">&nbsp;</td>
+                <td class="col-desc">&nbsp;</td>
+                <td class="col-safety">&nbsp;</td>
+                <td class="col-remain">&nbsp;</td>
+                <td class="col-diff">&nbsp;</td>
+                <td class="col-req">&nbsp;</td>
+                <td class="col-sakon">&nbsp;</td>
+              </tr>
+            `;
+          }
+        }
+
+        const pageBadge = totalPages > 1 ? `<div class="print-page-num">แผ่นที่ ${page + 1} / ${totalPages}</div>` : "";
+
+        sheetsHtml += `
+          <div class="print-sheet">
+            <div class="print-header">
+              <img src="${PEA_LOGO_SVG}"
+                   onerror="this.onerror=null; this.src='${PEA_LOGO_PNG}';"
+                   alt="PEA Logo" class="print-logo">
+              ${pageBadge}
+              <div class="print-title-1">ใบเบิกอุปกรณ์สำรองงานแก้กระแสไฟฟ้าขัดข้อง</div>
+              <div class="print-title-2">มาตรฐานพัสดุอุปกรณ์ ประจำคลังสำรองแก้ไขกระแสไฟฟ้าขัดข้อง</div>
+              <div class="print-title-3">ตามบันทึก ฉ.1 กบษ.(บร.) 825/2569 ลว.6 พ.ค.2569</div>
+              <div class="print-meta">
+                <span>วันที่ ${escapeHtml(printDateStr)}</span>
+                <span>หน่วยงานที่ขอเบิก ${officeLabel}</span>
+              </div>
+            </div>
+
+            <table class="print-table">
+              <thead>
+                <tr>
+                  <th class="col-seq">ลำดับ</th>
+                  <th class="col-mat">รหัสวัสดุ</th>
+                  <th class="col-desc">คำอธิบายวัสดุ</th>
+                  <th class="col-safety">เกณฑ์ Safety</th>
+                  <th class="col-remain">คงเหลือปัจจุบัน</th>
+                  <th class="col-diff">ผลต่าง</th>
+                  <th class="col-req">จำนวนต้องการเบิก</th>
+                  <th class="col-sakon">คงเหลือคลังสกลนคร</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+
+            <table class="print-signatures">
+              <tr>
+                <td style="width: 30%;"></td>
+                <td style="width: 33%;">ที่ ฉ.1 ......................................</td>
+                <td style="width: 37%;"></td>
+              </tr>
+              <tr>
+                <td>เรียน ............................................</td>
+                <td>เรียน ผจก.กฟจ.สน. &nbsp;&nbsp; เพื่อโปรดอนุมัติ</td>
+                <td>อนุมัติ หผ.คพ.กฟจ.สน. ดำเนินการต่อไป</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="print-sig-space"></td>
+              </tr>
+              <tr>
+                <td style="white-space: nowrap;">
+                  (ลงชื่อ) ................................ พชง<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(..................................)
+                </td>
+                <td style="white-space: nowrap;">
+                  (ลงชื่อ) ............................ หผ./ผจก.กฟส.<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(..................................)
+                </td>
+                <td style="white-space: nowrap;">
+                  (ลงชื่อ) .......................... ผจก.กฟจ.สน./ปฏิบัติงานแทน<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(..................................)
+                </td>
+              </tr>
+            </table>
+          </div>
+        `;
+      }
+      return sheetsHtml;
+    }
+
+    function printSelectedForm() {
+      const officeState = userState[currentOffice.key] || {};
+      const selectedItems = currentTableRows.filter(r => officeState[r.matCode] && officeState[r.matCode].checked);
+
+      if (selectedItems.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'ยังไม่มีรายการที่เลือก',
+          text: 'กรุณาเลือกรายการวัสดุที่ต้องการเบิกอย่างน้อย 1 รายการก่อนสั่งพิมพ์'
+        });
+        return;
+      }
+
+      const sheetsHtml = buildPrintSheetsHtml(selectedItems, officeState);
+      const totalPages = Math.ceil(selectedItems.length / 15);
+      const printWin = window.open("", "_blank");
+
+      if (printWin) {
+        printWin.document.open();
+        printWin.document.write(`<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ใบเบิกอุปกรณ์สำรอง_${escapeHtml(currentOffice.code)}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    @page { size: A4 landscape; margin: 8mm 10mm; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Sarabun', Tahoma, sans-serif;
+      color: #000;
+      background: #e2e8f0;
+      margin: 0;
+      padding: 14px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-toolbar {
+      max-width: 277mm;
+      margin: 0 auto 12px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #431c70;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 10px;
+    }
+    .print-toolbar button {
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-do-print { background: #f59e0b; color: #1e293b; }
+    .btn-close-win { background: #fff; color: #1e293b; margin-left: 8px; }
+    .print-sheet {
+      width: 277mm;
+      margin: 0 auto 16px auto;
+      background: #fff;
+      padding: 6mm 8mm;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      page-break-after: always;
+      break-after: page;
+    }
+    .print-sheet:last-child { page-break-after: auto; break-after: auto; }
+    .print-header { position: relative; text-align: center; min-height: 26mm; padding-top: 1mm; margin-bottom: 2.5mm; }
+    .print-logo { position: absolute; left: 2mm; top: 0; width: 22mm; height: 22mm; object-fit: contain; }
+    .print-page-num { position: absolute; right: 0; top: 0; font-size: 10pt; color: #333; }
+    .print-title-1 { font-size: 14pt; font-weight: 700; line-height: 1.3; }
+    .print-title-2 { font-size: 12.5pt; font-weight: 700; line-height: 1.3; }
+    .print-title-3 { font-size: 11.5pt; font-weight: 700; line-height: 1.3; }
+    .print-meta { margin-top: 2.5mm; font-size: 11.5pt; font-weight: 700; display: flex; justify-content: center; gap: 6mm; }
+    table.print-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 10pt; }
+    table.print-table th, table.print-table td { border: 1px solid #000; padding: 1.2mm 2mm; vertical-align: middle; line-height: 1.2; color: #000; }
+    table.print-table thead th { font-weight: 700; text-align: center; background: #fff; height: 7.5mm; font-size: 10pt; }
+    table.print-table tbody tr { height: 6.1mm; page-break-inside: avoid; break-inside: avoid; }
+    table.print-table .col-seq { width: 5%; text-align: center; }
+    table.print-table .col-mat { width: 13%; text-align: center; white-space: nowrap; }
+    table.print-table .col-desc { width: 34%; text-align: left; }
+    table.print-table .col-safety { width: 8.5%; text-align: center; }
+    table.print-table .col-remain { width: 10.5%; text-align: center; }
+    table.print-table .col-diff { width: 7%; text-align: center; }
+    table.print-table .col-req { width: 10.5%; text-align: center; font-weight: 700; }
+    table.print-table .col-sakon { width: 11.5%; text-align: center; }
+    .print-signatures { width: 100%; margin-top: 4mm; border-collapse: collapse; font-size: 10.5pt; line-height: 1.35; }
+    .print-signatures td { vertical-align: top; padding: 0.8mm 2mm; color: #000; }
+    .print-sig-space { height: 10mm; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .print-toolbar { display: none !important; }
+      .print-sheet { width: 100%; margin: 0; padding: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-toolbar">
+    <div>แบบฟอร์ม A4 แนวนอน (${totalPages} แผ่น / ${selectedItems.length} รายการ)</div>
+    <div>
+      <button class="btn-do-print" onclick="window.print()">สั่งพิมพ์ / บันทึก PDF</button>
+      <button class="btn-close-win" onclick="window.close()">ปิดหน้าต่าง</button>
+    </div>
+  </div>
+  ${sheetsHtml}
+</body>
+</html>`);
+        printWin.document.close();
+        printWin.focus();
+        printWin.print();
+        return;
+      }
+
+      document.getElementById("printContainer").innerHTML = sheetsHtml;
+      window.print();
+    }
+
+    function exportSelectedCSV() {
+      const officeState = userState[currentOffice.key] || {};
+      const selectedItems = currentTableRows.filter(r => officeState[r.matCode] && officeState[r.matCode].checked);
+      if (selectedItems.length === 0) return;
+
+      const sakonSuffix = isSakonDefaultLabel() ? "" : ` (${sakonWarehouseCode})`;
+      let csvContent = "\uFEFF";
+      csvContent += `หน่วยงานผู้เบิก,"${currentOffice.name.replace(/"/g, '""')} (${currentOffice.code})"\n`;
+      csvContent += `เบิกจากคลัง,"คลังพัสดุสกลนคร${sakonSuffix}"\n`;
+      csvContent += "ลำดับ,รหัสวัสดุ,คำอธิบายวัสดุ,Safety,คงเหลือ,ผลต่าง,ต้องการเบิก,คลังพัสดุสกลนคร\n";
+
+      selectedItems.forEach((item, idx) => {
+        const reqQty = officeState[item.matCode].reqQty || 0;
+        const cleanDesc = `"${item.desc.replace(/"/g, '""')}"`;
+        csvContent += `${idx + 1},"${item.matCode}",${cleanDesc},${item.safety},${item.remain},${item.diff},${reqQty},${item.sakonStock}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const safeFileCode = String(currentOffice.code).replace(/[\\/:*?"<>|]/g, '_');
+      link.href = URL.createObjectURL(blob);
+      link.download = `รายการขอเบิกพัสดุ_${safeFileCode}.csv`;
+      link.click();
+    }
+  </script>
+</body>
+</html>
