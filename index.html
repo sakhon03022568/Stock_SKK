@@ -670,7 +670,46 @@
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxV-cP-PStLl15JgtMhiFB36XD5_4Gupwb_-kaNSYuAoWmGlW4FJ_XHyXru6Zr0mOXr/exec";
 
     const PEA_LOGO_SVG = "https://upload.wikimedia.org/wikipedia/commons/9/90/Logo_of_the_Provincial_Electricity_Authority_of_Thailand.svg";
-    const PEA_LOGO_PNG = "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Logo_of_the_Provincial_Electricity_Authority_of_Thailand.svg/250px-Logo_of_the_Provincial_Electricity_Authority_of_Thailand.svg.png";
+    const PEA_LOGO_PNG = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Logo_of_the_Provincial_Electricity_Authority_of_Thailand.svg/250px-Logo_of_the_Provincial_Electricity_Authority_of_Thailand.svg.png";
+    const PEA_LOGO_CANDIDATES = [
+      "./pea-logo.png",
+      PEA_LOGO_PNG,
+      PEA_LOGO_SVG,
+      "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Logo_of_the_Provincial_Electricity_Authority_of_Thailand.svg/250px-Logo_of_the_Provincial_Electricity_Authority_of_Thailand.svg.png"
+    ];
+
+    // เก็บโลโก้ที่แปลงเป็น Base64 PNG แล้ว (ทำให้หน้าพิมพ์แสดงผลได้ทันทีไม่ขึ้นกรอบว่าง)
+    let cachedLogoSrc = PEA_LOGO_PNG;
+
+    function preloadPeaLogo(index = 0) {
+      if (index >= PEA_LOGO_CANDIDATES.length) {
+        // Fallback โหลดแบบปกติโดยไม่บังคับ CORS เพื่อให้เบราว์เซอร์แคชไว้
+        const plainImg = new Image();
+        plainImg.onload = function() { cachedLogoSrc = PEA_LOGO_PNG; };
+        plainImg.src = PEA_LOGO_PNG;
+        return;
+      }
+
+      const url = PEA_LOGO_CANDIDATES[index];
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = function() {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth || 250;
+          canvas.height = img.naturalHeight || 250;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          cachedLogoSrc = canvas.toDataURL("image/png");
+        } catch (e) {
+          cachedLogoSrc = url;
+        }
+      };
+      img.onerror = function() {
+        preloadPeaLogo(index + 1);
+      };
+      img.src = url;
+    }
 
     let sakonWarehouseCode = "G";
     const CENTRAL_OFFICE_TEMPLATE = {
@@ -749,9 +788,7 @@
     }
 
     window.onload = function() {
-      const preloadImg = new Image();
-      preloadImg.src = PEA_LOGO_SVG;
-
+      preloadPeaLogo(0);
       renderOfficeButtons();
       loadData();
     };
@@ -1415,8 +1452,8 @@
         sheetsHtml += `
           <div class="print-sheet">
             <div class="print-header">
-              <img src="${PEA_LOGO_SVG}"
-                   onerror="this.onerror=null; this.src='${PEA_LOGO_PNG}';"
+              <img src="${cachedLogoSrc}"
+                   onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='${PEA_LOGO_SVG}';}"
                    alt="PEA Logo" class="print-logo">
               ${pageBadge}
               <div class="print-title-1">ใบเบิกอุปกรณ์สำรองงานแก้กระแสไฟฟ้าขัดข้อง</div>
@@ -1587,16 +1624,45 @@
     </div>
   </div>
   ${sheetsHtml}
+  <script>
+    window.addEventListener('load', function() {
+      var imgs = Array.from(document.images || []);
+      var waitImgs = Promise.all(imgs.map(function(img) {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(function(resolve) {
+          img.addEventListener('load', resolve, { once: true });
+          img.addEventListener('error', resolve, { once: true });
+          setTimeout(resolve, 2500);
+        });
+      }));
+      var waitFonts = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+      Promise.all([waitImgs, waitFonts]).then(function() {
+        setTimeout(function() {
+          window.focus();
+          window.print();
+        }, 250);
+      });
+    });
+  <\/script>
 </body>
 </html>`);
         printWin.document.close();
-        printWin.focus();
-        printWin.print();
         return;
       }
 
-      document.getElementById("printContainer").innerHTML = sheetsHtml;
-      window.print();
+      const printContainer = document.getElementById("printContainer");
+      printContainer.innerHTML = sheetsHtml;
+      const fallbackImgs = Array.from(printContainer.querySelectorAll("img"));
+      Promise.all(fallbackImgs.map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(resolve => {
+          img.addEventListener("load", resolve, { once: true });
+          img.addEventListener("error", resolve, { once: true });
+          setTimeout(resolve, 2500);
+        });
+      })).then(() => {
+        setTimeout(() => window.print(), 150);
+      });
     }
 
     function exportSelectedCSV() {
