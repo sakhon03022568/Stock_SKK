@@ -552,7 +552,12 @@
               </div>
             </div>
 
-            <!-- ปุ่มใหม่: รายการที่ต้องการเบิก (แสดงผลต่าง > 0) -->
+            <!-- ปุ่มกรองดูเฉพาะรายการที่ติ๊กเลือกไว้ (ค้างไว้ได้ตอนกดสลับดูการไฟฟ้าแต่ละแห่ง) -->
+            <button type="button" class="btn btn-outline-success fw-semibold px-3 py-2 rounded-3" id="btnOnlySelected" onclick="toggleOnlySelected()">
+              <i class="fa-solid fa-check-double me-1"></i> เฉพาะรายการที่เลือก
+            </button>
+
+            <!-- ปุ่ม: รายการที่ต้องการเบิก (แสดงผลต่าง > 0) -->
             <button type="button" class="btn btn-outline-primary fw-semibold px-3 py-2 rounded-3" id="btnOnlyDiffPositive" onclick="toggleOnlyDiffPositive()">
               <i class="fa-solid fa-filter me-1"></i> รายการที่ต้องการเบิก
             </button>
@@ -701,7 +706,12 @@
     let currentPage = 1;
     let hideRedSakon = false;
     let onlyDiffPositive = false;
-    let userState = {};
+    let onlySelected = false;
+
+    // เก็บรายการที่ติ๊กเลือกไว้แบบใช้ร่วมกันทุกการไฟฟ้า (key = matCode)
+    let selectedMaterials = {};
+    // เก็บยอด "ต้องการเบิก" แยกตามแต่ละการไฟฟ้า (key = officeKey -> matCode)
+    let reqQtyState = {};
 
     function escapeHtml(str) {
       return String(str ?? '')
@@ -730,6 +740,12 @@
 
     function isRowRedInSakon(row, reqQty) {
       return row.sakonStock < reqQty || row.sakonStock === 0;
+    }
+
+    function getReqQty(officeKey, matCode) {
+      return reqQtyState[officeKey] && reqQtyState[officeKey][matCode] !== undefined
+        ? reqQtyState[officeKey][matCode]
+        : 0;
     }
 
     window.onload = function() {
@@ -817,10 +833,11 @@
 
     function selectOffice(officeKey) {
       currentOffice = OFFICES.find(o => o.key === officeKey) || BRANCH_OFFICES[0];
-      if (!userState[currentOffice.key]) {
-        userState[currentOffice.key] = {};
+      if (!reqQtyState[currentOffice.key]) {
+        reqQtyState[currentOffice.key] = {};
       }
 
+      // คงค่า onlySelected และ selectedMaterials ไว้เมื่อเปลี่ยนการไฟฟ้า
       hideRedSakon = false;
       onlyDiffPositive = false;
       updateHideRedButtonUI();
@@ -853,12 +870,8 @@
           if (remainVal < safetyVal * 0.5) lessThan50Count++;
           if (remainVal < safetyVal * 0.2) lessThan20Count++;
 
-          if (!userState[currentOffice.key][item.matCode]) {
-            const defaultReq = diffVal > 0 ? Math.min(diffVal, safetyVal) : 0;
-            userState[currentOffice.key][item.matCode] = {
-              checked: false,
-              reqQty: defaultReq
-            };
+          if (reqQtyState[currentOffice.key][item.matCode] === undefined) {
+            reqQtyState[currentOffice.key][item.matCode] = diffVal > 0 ? Math.min(diffVal, safetyVal) : 0;
           }
 
           currentTableRows.push({
@@ -886,15 +899,46 @@
       updateSelectedCounter();
     }
 
+    // ปุ่ม "เฉพาะรายการที่เลือก": แสดงเฉพาะรายการที่ติ๊กถูกไว้ (ค้างไว้ข้ามการไฟฟ้าได้)
+    function toggleOnlySelected() {
+      onlySelected = !onlySelected;
+      updateOnlySelectedButtonUI();
+      currentPage = 1;
+      applyFilters();
+
+      if (onlySelected) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'info',
+          title: `แสดงเฉพาะรายการที่เลือก ${filteredRows.length} รายการ (กดสลับดูการไฟฟ้าอื่นได้ทันที)`,
+          showConfirmButton: false,
+          timer: 2200
+        });
+      }
+    }
+
+    function updateOnlySelectedButtonUI() {
+      const btn = document.getElementById("btnOnlySelected");
+      if (onlySelected) {
+        btn.classList.remove("btn-outline-success");
+        btn.classList.add("btn-success", "text-white");
+        btn.innerHTML = `<i class="fa-solid fa-check-double me-1"></i> แสดงเฉพาะที่เลือกอยู่`;
+      } else {
+        btn.classList.remove("btn-success", "text-white");
+        btn.classList.add("btn-outline-success");
+        btn.innerHTML = `<i class="fa-solid fa-check-double me-1"></i> เฉพาะรายการที่เลือก`;
+      }
+    }
+
     // ปุ่ม "รายการที่ต้องการเบิก": แสดงเฉพาะผลต่าง > 0
     function toggleOnlyDiffPositive() {
       onlyDiffPositive = !onlyDiffPositive;
-      const officeState = userState[currentOffice.key] || {};
 
       if (onlyDiffPositive) {
         currentTableRows.forEach(row => {
-          if (row.diff <= 0 && officeState[row.matCode] && officeState[row.matCode].checked) {
-            officeState[row.matCode].checked = false;
+          if (row.diff <= 0 && selectedMaterials[row.matCode]) {
+            selectedMaterials[row.matCode] = false;
           }
         });
       }
@@ -931,15 +975,14 @@
 
     function toggleHideRedSakon() {
       hideRedSakon = !hideRedSakon;
-      const officeState = userState[currentOffice.key] || {};
 
       if (hideRedSakon) {
         let removedCount = 0;
         currentTableRows.forEach(row => {
-          const reqQty = officeState[row.matCode] ? (officeState[row.matCode].reqQty || 0) : 0;
+          const reqQty = getReqQty(currentOffice.key, row.matCode);
           if (isRowRedInSakon(row, reqQty)) {
-            if (officeState[row.matCode] && officeState[row.matCode].checked) {
-              officeState[row.matCode].checked = false;
+            if (selectedMaterials[row.matCode]) {
+              selectedMaterials[row.matCode] = false;
             }
             removedCount++;
           }
@@ -975,7 +1018,6 @@
 
     function applyFilters() {
       const keyword = document.getElementById("searchInput").value.toLowerCase().trim();
-      const officeState = userState[currentOffice.key] || {};
 
       filteredRows = currentTableRows.filter(row => {
         if (keyword) {
@@ -985,12 +1027,16 @@
           if (!matchKeyword) return false;
         }
 
+        if (onlySelected && !selectedMaterials[row.matCode]) {
+          return false;
+        }
+
         if (onlyDiffPositive && row.diff <= 0) {
           return false;
         }
 
         if (hideRedSakon) {
-          const reqQty = officeState[row.matCode] ? (officeState[row.matCode].reqQty || 0) : 0;
+          const reqQty = getReqQty(currentOffice.key, row.matCode);
           if (isRowRedInSakon(row, reqQty)) return false;
         }
 
@@ -1040,20 +1086,19 @@
         return;
       }
 
-      const officeState = userState[currentOffice.key] || {};
-
       tbody.innerHTML = rows.map((row, index) => {
-        const state = officeState[row.matCode] || { checked: false, reqQty: 0 };
+        const isChecked = !!selectedMaterials[row.matCode];
+        const reqQty = getReqQty(currentOffice.key, row.matCode);
         const diffBadgeClass = row.diff > 0 ? 'diff-shortage' : 'diff-ok';
         const diffText = row.diff > 0 ? `+${row.diff.toLocaleString()}` : row.diff.toLocaleString();
         const safeMat = escapeHtml(row.matCode);
-        const isSakonShort = isRowRedInSakon(row, state.reqQty);
+        const isSakonShort = isRowRedInSakon(row, reqQty);
 
         return `
-          <tr data-row-mat="${safeMat}" class="${state.checked ? 'row-selected' : ''}">
+          <tr data-row-mat="${safeMat}" class="${isChecked ? 'row-selected' : ''}">
             <td class="text-center">
               <input type="checkbox" class="form-check-input row-checkbox" 
-                     data-mat="${safeMat}" ${state.checked ? 'checked' : ''} 
+                     data-mat="${safeMat}" ${isChecked ? 'checked' : ''} 
                      onchange="onCheckRow(this.getAttribute('data-mat'), this.checked)">
             </td>
             <td class="text-center fw-semibold text-muted">${startIndex + index + 1}</td>
@@ -1069,7 +1114,7 @@
             <td class="text-center">
               <input type="number" class="req-input" min="0" max="${row.safety}" 
                      data-mat="${safeMat}"
-                     value="${state.reqQty}" 
+                     value="${reqQty}" 
                      onchange="onReqQtyChange(this.getAttribute('data-mat'), ${row.safety}, this)"
                      oninput="onReqQtyInput(this.getAttribute('data-mat'), ${row.safety}, this)">
             </td>
@@ -1168,11 +1213,12 @@
       if (val < 0) val = 0;
       inputEl.value = val;
 
-      userState[currentOffice.key][matCode].reqQty = val;
+      if (!reqQtyState[currentOffice.key]) reqQtyState[currentOffice.key] = {};
+      reqQtyState[currentOffice.key][matCode] = val;
       updateSakonCellColor(matCode, val);
 
-      if (val > 0 && !userState[currentOffice.key][matCode].checked) {
-        userState[currentOffice.key][matCode].checked = true;
+      if (val > 0 && !selectedMaterials[matCode]) {
+        selectedMaterials[matCode] = true;
         const cb = Array.from(document.querySelectorAll('.row-checkbox')).find(el => el.getAttribute('data-mat') === matCode);
         if (cb) cb.checked = true;
         const tr = Array.from(document.querySelectorAll('#tableBody tr')).find(el => el.getAttribute('data-row-mat') === matCode);
@@ -1183,7 +1229,7 @@
     }
 
     function onCheckRow(matCode, isChecked) {
-      userState[currentOffice.key][matCode].checked = isChecked;
+      selectedMaterials[matCode] = isChecked;
       const tr = Array.from(document.querySelectorAll('#tableBody tr')).find(el => el.getAttribute('data-row-mat') === matCode);
       if (tr) {
         if (isChecked) tr.classList.add('row-selected');
@@ -1198,7 +1244,7 @@
       checkboxes.forEach(cb => {
         cb.checked = masterCb.checked;
         const matCode = cb.getAttribute('data-mat');
-        userState[currentOffice.key][matCode].checked = masterCb.checked;
+        selectedMaterials[matCode] = masterCb.checked;
         const tr = cb.closest('tr');
         if (tr) {
           if (masterCb.checked) tr.classList.add('row-selected');
@@ -1219,10 +1265,9 @@
     }
 
     function updateSelectedCounter() {
-      const officeState = userState[currentOffice.key] || {};
       let count = 0;
       currentTableRows.forEach(r => {
-        if (officeState[r.matCode] && officeState[r.matCode].checked) {
+        if (selectedMaterials[r.matCode]) {
           count++;
         }
       });
@@ -1237,23 +1282,21 @@
 
     function autoFillShortage() {
       let filledCount = 0;
+      if (!reqQtyState[currentOffice.key]) reqQtyState[currentOffice.key] = {};
+
       currentTableRows.forEach(row => {
         if (currentOffice.isCentral) {
           if (row.diff > 0) {
             const suggestQty = Math.min(row.diff, row.safety);
-            userState[currentOffice.key][row.matCode] = {
-              checked: true,
-              reqQty: suggestQty
-            };
+            selectedMaterials[row.matCode] = true;
+            reqQtyState[currentOffice.key][row.matCode] = suggestQty;
             filledCount++;
           }
         } else {
           if (row.diff > 0 && row.sakonStock > 0) {
             const suggestQty = Math.min(row.diff, row.safety, row.sakonStock);
-            userState[currentOffice.key][row.matCode] = {
-              checked: true,
-              reqQty: suggestQty
-            };
+            selectedMaterials[row.matCode] = true;
+            reqQtyState[currentOffice.key][row.matCode] = suggestQty;
             filledCount++;
           }
         }
@@ -1270,17 +1313,16 @@
     }
 
     function clearAllSelections() {
-      Object.keys(userState[currentOffice.key] || {}).forEach(matCode => {
-        userState[currentOffice.key][matCode].checked = false;
-      });
+      selectedMaterials = {};
+      onlySelected = false;
+      updateOnlySelectedButtonUI();
       document.getElementById("selectAllCheckbox").checked = false;
       applyFilters();
       updateSelectedCounter();
     }
 
     function showSelectedModal() {
-      const officeState = userState[currentOffice.key] || {};
-      const selectedItems = currentTableRows.filter(r => officeState[r.matCode] && officeState[r.matCode].checked);
+      const selectedItems = currentTableRows.filter(r => !!selectedMaterials[r.matCode]);
 
       const sakonSuffix = isSakonDefaultLabel() ? "" : ` (รหัสคลัง ${sakonWarehouseCode})`;
       document.getElementById("modalOfficeSubtitle").innerText = currentOffice.isCentral
@@ -1300,7 +1342,7 @@
         tableWrapper.classList.remove("d-none");
 
         modalBody.innerHTML = selectedItems.map((item, idx) => {
-          const reqQty = officeState[item.matCode].reqQty || 0;
+          const reqQty = getReqQty(currentOffice.key, item.matCode);
           const isSakonShort = item.sakonStock < reqQty || item.sakonStock === 0;
           return `
             <tr>
@@ -1321,7 +1363,7 @@
       modal.show();
     }
 
-    function buildPrintSheetsHtml(selectedItems, officeState) {
+    function buildPrintSheetsHtml(selectedItems) {
       const ITEMS_PER_PAGE = 15;
       const totalPages = Math.ceil(selectedItems.length / ITEMS_PER_PAGE);
       const printDateStr = getThaiDateString();
@@ -1339,7 +1381,7 @@
           const item = chunk[r];
 
           if (item) {
-            const reqQty = officeState[item.matCode].reqQty || 0;
+            const reqQty = getReqQty(currentOffice.key, item.matCode);
             rowsHtml += `
               <tr>
                 <td class="col-seq">${seqNo}</td>
@@ -1440,8 +1482,7 @@
     }
 
     function printSelectedForm() {
-      const officeState = userState[currentOffice.key] || {};
-      const selectedItems = currentTableRows.filter(r => officeState[r.matCode] && officeState[r.matCode].checked);
+      const selectedItems = currentTableRows.filter(r => !!selectedMaterials[r.matCode]);
 
       if (selectedItems.length === 0) {
         Swal.fire({
@@ -1452,7 +1493,7 @@
         return;
       }
 
-      const sheetsHtml = buildPrintSheetsHtml(selectedItems, officeState);
+      const sheetsHtml = buildPrintSheetsHtml(selectedItems);
       const totalPages = Math.ceil(selectedItems.length / 15);
       const printWin = window.open("", "_blank");
 
@@ -1559,8 +1600,7 @@
     }
 
     function exportSelectedCSV() {
-      const officeState = userState[currentOffice.key] || {};
-      const selectedItems = currentTableRows.filter(r => officeState[r.matCode] && officeState[r.matCode].checked);
+      const selectedItems = currentTableRows.filter(r => !!selectedMaterials[r.matCode]);
       if (selectedItems.length === 0) return;
 
       const sakonSuffix = isSakonDefaultLabel() ? "" : ` (${sakonWarehouseCode})`;
@@ -1570,7 +1610,7 @@
       csvContent += "ลำดับ,รหัสวัสดุ,คำอธิบายวัสดุ,Safety,คงเหลือ,ผลต่าง,ต้องการเบิก,คลังพัสดุสกลนคร\n";
 
       selectedItems.forEach((item, idx) => {
-        const reqQty = officeState[item.matCode].reqQty || 0;
+        const reqQty = getReqQty(currentOffice.key, item.matCode);
         const cleanDesc = `"${item.desc.replace(/"/g, '""')}"`;
         csvContent += `${idx + 1},"${item.matCode}",${cleanDesc},${item.safety},${item.remain},${item.diff},${reqQty},${item.sakonStock}\n`;
       });
